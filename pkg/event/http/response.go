@@ -7,11 +7,11 @@ import (
 
 type ScheduleResponse struct {
 	ScheduleId string     `json:"scheduleId"`
-	StartTime  time.Time  `json:"startTime"`
+	StartTime  time.Time  `json:"startTime,omitempty"`
 	EndTime    *time.Time `json:"endTime"`
 	Location   string     `json:"location"`
 	BasePrice  uint64     `json:"basePrice"`
-	PromoPrice *uint64    `json:"promoPrice"`
+	PromoPrice *uint64    `json:"promoPrice,omitempty"`
 	Quota      uint       `json:"quota"`
 	Booked     uint       `json:"booked"`
 }

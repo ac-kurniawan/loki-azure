@@ -22,4 +22,5 @@ func (c *EventController) Controller() {
 	routes.Post("/:eventId/schedule", c.EventHandler.CreateSchedule)
 	routes.Get("/:eventId", c.EventHandler.GetEventById)
 	routes.Get("/:eventId/schedule", c.EventHandler.GetSchedulesByEventId)
+	routes.Get("/schedule/:scheduleId", c.EventHandler.GetScheduleById)
 }

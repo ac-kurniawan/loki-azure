@@ -1,0 +1,192 @@
+openapi: 3.0.3
+info:
+  title: Loki-azure
+  description: Loki-azure
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:3222'
+tags:
+  - name: event
+    description: event domain
+  - name: order
+    description: order domain
+  - name: payment
+    description: payment domain
+paths:
+  /event:
+    post:
+      tags:
+        - event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventRequest'
+      responses:
+        200:
+          $ref: "#/components/responses/EventSuccessResponse"
+      summary: create new event
+  /event/{eventId}:
+    get:
+      tags:
+        - event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: string
+          required: true
+          description: event id
+      responses:
+        200:
+          $ref: "#/components/responses/EventSuccessResponse"
+  /event/{eventId}/schedule:
+    get:
+      tags:
+        - event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: string
+          required: true
+          description: event id
+      responses:
+        200:
+          $ref: "#/components/responses/SchedulesSuccessResponse"
+    post:
+      tags:
+        - event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: string
+          required: true
+          description: event id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScheduleRequest"
+      responses:
+        200:
+          $ref: "#/components/responses/SchedulesSuccessResponse"
+components:
+  schemas:
+    ScheduleRequest:
+      type: object
+      properties:
+        startTime:
+          type: string
+          required: true
+          example: "2021-02-18T21:54:42.123Z"
+        endTime:
+          type: string
+          required: false
+          example: "2021-02-20T21:54:42.123Z"
+        location:
+          type: string
+          required: true
+          example: "Pahlawan street 101"
+        basePrice:
+          type: integer
+          required: true
+          example: 100000
+        promoPrice:
+          type: integer
+          required: false
+          example: 80000
+        quota:
+          type: integer
+          required: true
+          example: 100
+    EventRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: lorem
+        description:
+          type: string
+          example: lorem ipsum dolor
+        isPublished:
+          type: boolean
+          example: true
+    EventSchema:
+      type: object
+      properties:
+        eventId:
+          type: string
+          example: 13e6ceae-ad95-4413-a34f-1d5850f286c1
+        name:
+          type: string
+          example: lorem
+        description:
+          type: string
+          example: lorem ipsum dolor
+        isPublished:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          example: "2022-05-18T16:15:45.093973+07:00"
+        updatedAt:
+          type: string
+          example: "2022-05-18T16:15:45.093973+07:00"
+    ScheduleSchema:
+      type: object
+      properties:
+        scheduleId:
+          type: string
+          example: d239e068-ed98-42cf-b37a-928b65914edb
+        startTime:
+          type: string
+          example: "2021-02-19T04:54:42.123+07:00"
+        endTime:
+          type: string
+          example: null
+        location:
+          type: string
+          example: "Pahlawan street 101"
+        basePrice:
+          type: integer
+          example: 100000
+        promoPrice:
+          type: integer
+          example: 80000
+        quota:
+          type: integer
+          example: 100
+        booked:
+          type: integer
+          example: 0
+
+  responses:
+    EventSuccessResponse:
+      description: success response for order creation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+                example: 201
+              data:
+                $ref: "#/components/schemas/EventSchema"
+    SchedulesSuccessResponse:
+      description: success response for order creation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+                example: 201
+              data:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScheduleSchema"

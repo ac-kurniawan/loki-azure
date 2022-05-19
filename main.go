@@ -5,6 +5,7 @@ import (
 	"github.com/ac-kurniawan/loki-azure/pkg/common"
 	config2 "github.com/ac-kurniawan/loki-azure/pkg/config"
 	"github.com/ac-kurniawan/loki-azure/pkg/event"
+	"github.com/ac-kurniawan/loki-azure/pkg/order"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
@@ -25,13 +26,25 @@ func main() {
 	log.Info("start server")
 
 	eventSchemaName := "event"
-	psqlConnection, err := common.NewPSQLConnection(
+	eventPsqlConnection, err := common.NewPSQLConnection(
 		config.PSQL_HOST,
 		config.PSQL_PORT,
 		config.PSQL_USERNAME,
 		config.PSQL_PASSWORD,
 		config.PSQL_DB_NAME,
 		&eventSchemaName,
+	)
+	if err != nil {
+		panic("Error connect to db")
+	}
+	orderSchemaName := "orders"
+	orderPsqlConnection, err := common.NewPSQLConnection(
+		config.PSQL_HOST,
+		config.PSQL_PORT,
+		config.PSQL_USERNAME,
+		config.PSQL_PASSWORD,
+		config.PSQL_DB_NAME,
+		&orderSchemaName,
 	)
 	if err != nil {
 		panic("Error connect to db")
@@ -44,11 +57,18 @@ func main() {
 
 	eventApp := event.EventApplication{
 		Fiber:          fiberApp,
-		GormConnection: psqlConnection,
+		GormConnection: eventPsqlConnection,
+		Logrus:         log,
+	}
+
+	orderApp := order.OrderApplication{
+		Fiber:          fiberApp,
+		GormConnection: orderPsqlConnection,
 		Logrus:         log,
 	}
 
 	eventApp.Run()
+	orderApp.Run()
 
 	// run server
 	go func() {

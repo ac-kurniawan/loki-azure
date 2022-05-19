@@ -1,24 +1,37 @@
 package http_event
 
 import (
+	"fmt"
 	core_event "github.com/ac-kurniawan/loki-azure/pkg/event/core"
 	"time"
 )
 
 type ScheduleRequest struct {
-	StartTime  time.Time  `json:"startTime"`
-	EndTime    *time.Time `json:"endTime"`
-	Location   string     `json:"location"`
-	BasePrice  uint64     `json:"basePrice"`
-	PromoPrice *uint64    `json:"promoPrice"`
-	Quota      uint       `json:"quota"`
-	Booked     uint       `json:"booked"`
+	StartTime  string  `json:"startTime"`
+	EndTime    string  `json:"endTime,omitempty"`
+	Location   string  `json:"location"`
+	BasePrice  uint64  `json:"basePrice"`
+	PromoPrice *uint64 `json:"promoPrice,omitempty"`
+	Quota      uint    `json:"quota"`
+	Booked     uint    `json:"booked,omitempty"`
 }
 
 func (s *ScheduleRequest) ToEntity(eventId string) *core_event.Schedule {
+	startTime, err := time.Parse(time.RFC3339, s.StartTime)
+	if err != nil {
+		fmt.Printf("error: %v\n", err)
+	}
+	var endTime *time.Time
+	if s.EndTime != "" {
+		datetime, err := time.Parse(time.RFC3339, s.EndTime)
+		endTime = &datetime
+		if err != nil {
+			fmt.Printf("error: %v\n", err)
+		}
+	}
 	return &core_event.Schedule{
-		StartTime:  s.StartTime,
-		EndTime:    s.EndTime,
+		StartTime:  startTime,
+		EndTime:    endTime,
 		Location:   s.Location,
 		BasePrice:  s.BasePrice,
 		PromoPrice: s.PromoPrice,

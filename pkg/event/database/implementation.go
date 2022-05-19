@@ -50,7 +50,7 @@ func (e EventRepository) CreateSchedule(data core_event.Schedule) (*core_event.S
 	model := ScheduleModel{}
 	model.FromEntity(data)
 
-	result := e.DbConnection.Model(&ScheduleModel{}).Create(model)
+	result := e.DbConnection.Model(ScheduleModel{}).Create(&model)
 
 	if result.Error != nil {
 		return nil, result.Error

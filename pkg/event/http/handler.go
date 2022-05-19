@@ -58,8 +58,9 @@ func (h *EventHandler) CreateSchedule(c *fiber.Ctx) error {
 	var request ScheduleRequest
 	if err := c.BodyParser(&request); err != nil {
 		return c.Status(400).JSON(
-			map[string]interface{}{
-				"message": err.Error(),
+			common.Response[error]{
+				Status:  400,
+				Message: err.Error(),
 			},
 		)
 	}
@@ -71,9 +72,9 @@ func (h *EventHandler) CreateSchedule(c *fiber.Ctx) error {
 
 	var response ScheduleResponse
 	response.FromEntity(*schedule)
-	return c.Status(200).JSON(
+	return c.Status(201).JSON(
 		common.Response[ScheduleResponse]{
-			Status: 200,
+			Status: 201,
 			Data:   response,
 		},
 	)
@@ -98,6 +99,23 @@ func (h *EventHandler) GetSchedulesByEventId(c *fiber.Ctx) error {
 		common.Response[[]ScheduleResponse]{
 			Status: 200,
 			Data:   responses,
+		},
+	)
+}
+
+func (h *EventHandler) GetScheduleById(c *fiber.Ctx) error {
+	scheduleId := c.Params("scheduleId")
+	schedule, err := h.EventService.GetScheduleById(scheduleId)
+	if err != nil {
+		return c.Status(500).JSON(core_event.GetHttpError(err))
+	}
+
+	var response ScheduleResponse
+	response.FromEntity(*schedule)
+	return c.Status(200).JSON(
+		common.Response[ScheduleResponse]{
+			Status: 200,
+			Data:   response,
 		},
 	)
 }
