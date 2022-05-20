@@ -54,3 +54,17 @@ func (e *EventRequest) ToEntity() *core_event.Event {
 		IsPublished: e.IsPublished,
 	}
 }
+
+type BookedRequest struct {
+	OrderId    string `json:"orderId"`
+	ScheduleId string `json:"scheduleId"`
+	Qty        int    `json:"qty"`
+}
+
+func (i *BookedRequest) ToEntity() core_event.Book {
+	return core_event.Book{
+		OrderId:    i.OrderId,
+		ScheduleId: i.ScheduleId,
+		Qty:        uint(i.Qty),
+	}
+}

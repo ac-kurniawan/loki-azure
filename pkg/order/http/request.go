@@ -17,3 +17,7 @@ func (i *OrderRequest) ToEntity() core_order.Order {
 		Qty:         i.Qty,
 	}
 }
+
+type CheckoutRequest struct {
+	OrderId string `json:"orderId"`
+}

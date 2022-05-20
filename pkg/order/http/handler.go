@@ -21,12 +21,38 @@ func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
 		)
 	}
 
-	event, err := h.OrderService.CreateOrder(request.ToEntity())
+	order, err := h.OrderService.CreateOrder(request.ToEntity())
 	if err != nil {
 		return c.Status(500).JSON(core_order.GetHttpError(err))
 	}
 	var response OrderResponse
-	response.FromEntity(*event)
+	response.FromEntity(*order)
+
+	return c.Status(201).JSON(
+		common.Response[OrderResponse]{
+			Status: 201,
+			Data:   response,
+		},
+	)
+}
+
+func (h *OrderHandler) Checkout(c *fiber.Ctx) error {
+	var request CheckoutRequest
+
+	if err := c.BodyParser(&request); err != nil {
+		return c.Status(400).JSON(
+			map[string]interface{}{
+				"message": err.Error(),
+			},
+		)
+	}
+
+	order, err := h.OrderService.Checkout(request.OrderId)
+	if err != nil {
+		return c.Status(500).JSON(core_order.GetHttpError(err))
+	}
+	var response OrderResponse
+	response.FromEntity(*order)
 
 	return c.Status(201).JSON(
 		common.Response[OrderResponse]{
@@ -38,13 +64,13 @@ func (h *OrderHandler) CreateOrder(c *fiber.Ctx) error {
 
 func (h *OrderHandler) GetOrderById(c *fiber.Ctx) error {
 	orderId := c.Params("orderId")
-	event, err := h.OrderService.GetOrderById(orderId)
+	order, err := h.OrderService.GetOrderById(orderId)
 	if err != nil {
 		return c.Status(500).JSON(core_order.GetHttpError(err))
 	}
 
 	var response OrderResponse
-	response.FromEntity(*event)
+	response.FromEntity(*order)
 	return c.Status(200).JSON(
 		common.Response[OrderResponse]{
 			Status: 200,

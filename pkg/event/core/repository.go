@@ -7,4 +7,7 @@ type IEventRepository interface {
 	CreateSchedule(data Schedule) (*Schedule, error)
 	GetSchedulesByEventId(eventId string) ([]Schedule, error)
 	GetScheduleById(scheduleId string) (*Schedule, error)
+	UpdateSchedule(data Schedule) (*Schedule, error)
+	CreateBook(data Book) (*Book, error)
+	GetBookById(orderId string) (*Book, error)
 }

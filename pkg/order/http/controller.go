@@ -18,4 +18,5 @@ func (o *OrderController) Controller() {
 
 	routes.Post("/", o.OrderHandler.CreateOrder)
 	routes.Get("/:orderId", o.OrderHandler.GetOrderById)
+	routes.Post("/checkout", o.OrderHandler.Checkout)
 }

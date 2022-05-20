@@ -7,11 +7,51 @@ type IEventService interface {
 	CreateSchedule(data Schedule) (*Schedule, error)
 	GetSchedulesByEventId(eventId string) ([]Schedule, error)
 	GetScheduleById(scheduleId string) (*Schedule, error)
+	AddBooked(data Book) (*Schedule, error)
+	UpdateSchedule(data Schedule) (*Schedule, error)
 }
 
 type EventService struct {
 	EventRepository IEventRepository
 	Utils           Utils
+}
+
+func (e EventService) UpdateSchedule(data Schedule) (*Schedule, error) {
+	if result, err := e.EventRepository.UpdateSchedule(data); err != nil {
+		e.Utils.Log.Errorf("error while update schedule record: %s", err.Error())
+		return nil, DATABASE_ERROR
+	} else {
+		return result, nil
+	}
+}
+
+func (e EventService) AddBooked(data Book) (*Schedule, error) {
+	book, err := e.EventRepository.GetBookById(data.OrderId)
+	if book != nil {
+		return nil, BOOK_IS_EXIST
+	}
+
+	schedule, err := e.GetScheduleById(data.ScheduleId)
+	if err != nil {
+		return nil, DATABASE_ERROR
+	}
+	afterBooked := schedule.Booked + data.Qty
+	if afterBooked > schedule.Quota {
+		return nil, EXCEEDED_QUOTA
+	}
+
+	schedule.Booked = afterBooked
+	updated, err := e.UpdateSchedule(*schedule)
+	if err != nil {
+		return nil, DATABASE_ERROR
+	}
+
+	_, err = e.EventRepository.CreateBook(data)
+	if err != nil {
+		return nil, DATABASE_ERROR
+	}
+
+	return updated, nil
 }
 
 func (e EventService) CreateEvent(data Event) (*Event, error) {

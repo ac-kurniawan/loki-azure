@@ -119,3 +119,29 @@ func (h *EventHandler) GetScheduleById(c *fiber.Ctx) error {
 		},
 	)
 }
+
+func (h *EventHandler) Booked(c *fiber.Ctx) error {
+	var request BookedRequest
+
+	if err := c.BodyParser(&request); err != nil {
+		return c.Status(400).JSON(
+			map[string]interface{}{
+				"message": err.Error(),
+			},
+		)
+	}
+
+	schedule, err := h.EventService.AddBooked(request.ToEntity())
+	if err != nil {
+		return c.Status(500).JSON(core_event.GetHttpError(err))
+	}
+	var response ScheduleResponse
+	response.FromEntity(*schedule)
+
+	return c.Status(201).JSON(
+		common.Response[ScheduleResponse]{
+			Status: 201,
+			Data:   response,
+		},
+	)
+}

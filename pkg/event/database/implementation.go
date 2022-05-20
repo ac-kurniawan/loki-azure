@@ -1,12 +1,52 @@
 package database_event
 
 import (
+	"errors"
 	core_event "github.com/ac-kurniawan/loki-azure/pkg/event/core"
 	"gorm.io/gorm"
 )
 
 type EventRepository struct {
 	DbConnection *gorm.DB
+}
+
+func (e EventRepository) CreateBook(data core_event.Book) (*core_event.Book, error) {
+	var model BookModel
+	model.FromEntity(data)
+
+	result := e.DbConnection.Model(BookModel{}).Create(&model)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return model.ToEntity(), nil
+}
+
+func (e EventRepository) GetBookById(orderId string) (*core_event.Book, error) {
+	var model BookModel
+
+	result := e.DbConnection.Model(BookModel{}).Limit(1).Find(&model, "order_id = ?", orderId)
+	if result.RowsAffected == 0 {
+		return nil, errors.New("record not found")
+	}
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return model.ToEntity(), nil
+}
+
+func (e EventRepository) UpdateSchedule(data core_event.Schedule) (*core_event.Schedule, error) {
+	model := ScheduleModel{}
+	model.FromEntity(data)
+
+	result := e.DbConnection.Model(&ScheduleModel{}).Where("schedule_id = ?", data.ScheduleId).Updates(model)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return model.ToEntity(), nil
 }
 
 func (e EventRepository) GetEventById(eventId string) (*core_event.Event, error) {

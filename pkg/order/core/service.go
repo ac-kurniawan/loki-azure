@@ -7,12 +7,66 @@ type IOrderService interface {
 	GetOrderById(orderId string) (*Order, error)
 	UpdateOrder(data Order) (*Order, error)
 	UpdateOrderStatus(orderId string, status string) (*Order, error)
+	Checkout(orderId string) (*Order, error)
 }
 
 type OrderService struct {
 	Repository      IOrderRepository
 	EventRepository IEventRepository
 	Utils           Utils
+}
+
+func (o OrderService) Checkout(orderId string) (*Order, error) {
+	order, err := o.GetOrderById(orderId)
+	if err != nil {
+		return nil, err
+	}
+
+	expired := order.CreatedAt.Add(300 * time.Second)
+	timeNow := time.Now()
+	if timeNow.After(expired) {
+		o.Utils.Log.Errorf(
+			"error while checkout caused, %s, timeNow: %s order time: %s", ORDER_EXPIRED,
+			timeNow.String(), order.CreatedAt.String(),
+		)
+		o.UpdateOrderStatus(orderId, ORDER_STATUS_TIMEOUT)
+		return nil, ORDER_EXPIRED
+	}
+
+	if order.Status != ORDER_STATUS_WAITING_FOR_PAYMENT {
+		o.Utils.Log.Errorf(
+			"error while checkout caused, %s, %v", ORDER_CANNOT_CHECKOUT,
+			err,
+		)
+		return nil, ORDER_CANNOT_CHECKOUT
+	}
+
+	updated, err := o.UpdateOrderStatus(orderId, ORDER_STATUS_SUCCESS)
+	if err != nil {
+		o.Utils.Log.Errorf(
+			"error while checkout caused, %s, %v", DATABASE_ERROR,
+			err,
+		)
+		return nil, DATABASE_ERROR
+	}
+
+	_, err = o.EventRepository.OrderBooked(
+		Booked{
+			OrderId:    orderId,
+			ScheduleId: order.ScheduleId,
+			Qty:        order.Qty,
+		},
+	)
+
+	if err != nil {
+		o.Utils.Log.Errorf(
+			"error while checkout caused, %s, %v", ORDER_CANNOT_CHECKOUT,
+			err,
+		)
+		return nil, ORDER_CANNOT_CHECKOUT
+	}
+
+	return updated, nil
 }
 
 func (o OrderService) CreateOrder(data Order) (*Order, error) {

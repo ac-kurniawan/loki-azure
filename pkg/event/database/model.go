@@ -87,3 +87,23 @@ func (e *EventModel) FromEntity(data core_event.Event) {
 	e.UpdatedAt = data.UpdatedAt
 	e.Schedules = schedules
 }
+
+type BookModel struct {
+	OrderId    string `gorm:"type:uuid;primaryKey;index"`
+	ScheduleId string
+	Qty        uint
+}
+
+func (b *BookModel) ToEntity() *core_event.Book {
+	return &core_event.Book{
+		OrderId:    b.OrderId,
+		ScheduleId: b.ScheduleId,
+		Qty:        b.Qty,
+	}
+}
+
+func (b *BookModel) FromEntity(data core_event.Book) {
+	b.OrderId = data.OrderId
+	b.ScheduleId = data.ScheduleId
+	b.Qty = data.Qty
+}

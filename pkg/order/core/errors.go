@@ -10,6 +10,8 @@ var (
 	FAILED_TO_FETCH_EVENT = errors.New("failed to fetch to event service")
 	EXCEEDED_QUOTA        = errors.New("exceeded quota")
 	EVENT_EXPIRED         = errors.New("event expired")
+	ORDER_EXPIRED         = errors.New("order expired")
+	ORDER_CANNOT_CHECKOUT = errors.New("order cannot checkout, because already timeout/cancel/success")
 )
 
 func GetHttpError(err error) common.Response[any] {
@@ -34,6 +36,17 @@ func GetHttpError(err error) common.Response[any] {
 			Status:  500,
 			Message: EVENT_EXPIRED.Error(),
 		}
+	case ORDER_EXPIRED:
+		return common.Response[any]{
+			Status:  500,
+			Message: ORDER_EXPIRED.Error(),
+		}
+	case ORDER_CANNOT_CHECKOUT:
+		return common.Response[any]{
+			Status:  500,
+			Message: ORDER_CANNOT_CHECKOUT.Error(),
+		}
+
 	}
 
 	return common.Response[any]{

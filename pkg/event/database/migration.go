@@ -7,7 +7,7 @@ type Migrations struct {
 }
 
 func (m *Migrations) Run() error {
-	err := m.DbConnection.AutoMigrate(&EventModel{}, &ScheduleModel{})
+	err := m.DbConnection.AutoMigrate(&EventModel{}, &ScheduleModel{}, &BookModel{})
 
 	if err != nil {
 		return err

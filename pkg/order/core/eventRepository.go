@@ -23,7 +23,14 @@ type Event struct {
 	UpdatedAt   time.Time
 }
 
+type Booked struct {
+	OrderId    string
+	ScheduleId string
+	Qty        int
+}
+
 type IEventRepository interface {
 	GetScheduleById(scheduleId string) (*Schedule, error)
 	GetEventById(eventId string) (*Event, error)
+	OrderBooked(data Booked) (*Schedule, error)
 }

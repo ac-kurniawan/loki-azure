@@ -23,3 +23,9 @@ type Event struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
+
+type Book struct {
+	OrderId    string
+	ScheduleId string
+	Qty        uint
+}

@@ -7,6 +7,7 @@ import (
 	"github.com/ac-kurniawan/loki-azure/pkg/event"
 	"github.com/ac-kurniawan/loki-azure/pkg/order"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/sirupsen/logrus"
@@ -52,7 +53,13 @@ func main() {
 
 	fiberApp := fiber.New()
 	fiberApp.Use(recover.New())
-	fiberApp.Use(recover.New())
+	fiberApp.Use(
+		logger.New(
+			logger.Config{
+				Format: "[${time}] ${status} - ${latency} ${method} ${path} - ${body}\n",
+			},
+		),
+	)
 	fiberApp.Use(requestid.New(requestid.ConfigDefault))
 
 	eventApp := event.EventApplication{
