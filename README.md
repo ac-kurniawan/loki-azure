@@ -1,9 +1,10 @@
 # Loki Azure
 
 ## How to run
-1. Create `.env` file, you can refer to `env.example` to know the parameters needed
-2. To migrate all model: `make migration`, please add `uuid` extension in your db using this query `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
-3. To start apps: `make run` (server should be run in :3222 by default)
+1. Make sure that you use go version >= 1.18
+2. Create `.env` file, you can refer to `env.example` to know the parameters needed
+3. To migrate all model: `make migration`, please add `uuid` extension in your db using this query `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
+4. To start apps: `make run` (server should be run in :3222 by default)
 
 ## HTTP REST API
 
@@ -103,5 +104,81 @@ response:
             "booked": 0
         }
     ]
+}
+```
+
+### 5. Create order
+```curl
+curl --location --request POST 'localhost:3222/order' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "phoneNumber": "628000000001",
+    "email": "asd@asd.id",
+    "scheduleId": "855c50a3-7483-4783-b526-ecb0064d9880",
+    "qty": 2
+}'
+```
+response:
+```json
+{
+    "status": 201,
+    "data": {
+        "orderId": "bbf3c675-8508-4cd1-942c-88c40bdd3633",
+        "phoneNumber": "628000000001",
+        "email": "asd@asd.id",
+        "status": "WAITING_FOR_PAYMENT",
+        "scheduleId": "855c50a3-7483-4783-b526-ecb0064d9880",
+        "qty": 2,
+        "createdAt": "2022-05-24T20:25:31.473821+07:00",
+        "updateAt": "2022-05-24T20:25:31.473821+07:00"
+    }
+}
+```
+
+### 6. Get order by id
+```curl
+curl --location --request GET 'localhost:3222/order/7713da7b-ea3e-43e0-8941-e5cd68a45329'
+```
+
+response:
+```json
+{
+    "status": 200,
+    "data": {
+        "orderId": "7713da7b-ea3e-43e0-8941-e5cd68a45329",
+        "phoneNumber": "628000000001",
+        "email": "asd@asd.id",
+        "status": "WAITING_FOR_PAYMENT",
+        "scheduleId": "363ff703-4b3b-4ec0-bd45-32e56df4e663",
+        "qty": 2,
+        "createdAt": "2022-05-24T20:08:29.917114+07:00",
+        "updateAt": "2022-05-24T20:08:29.917114+07:00"
+    }
+}
+```
+
+### 7. Checkout order
+```curl
+curl --location --request POST 'localhost:3222/order/checkout' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "orderId": "bbf3c675-8508-4cd1-942c-88c40bdd3633"
+}'
+```
+
+response:
+```json
+{
+    "status": 201,
+    "data": {
+        "orderId": "bbf3c675-8508-4cd1-942c-88c40bdd3633",
+        "phoneNumber": "628000000001",
+        "email": "asd@asd.id",
+        "status": "SUCCESS",
+        "scheduleId": "855c50a3-7483-4783-b526-ecb0064d9880",
+        "qty": 2,
+        "createdAt": "2022-05-24T20:25:31.473821+07:00",
+        "updateAt": "2022-05-24T20:25:31.473821+07:00"
+    }
 }
 ```
