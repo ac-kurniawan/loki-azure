@@ -7,7 +7,7 @@ import (
 
 func GetHttpClient() *httpclient.Client {
 	client := httpclient.NewClient(
-		httpclient.WithHTTPTimeout(1000 * time.Millisecond),
+		httpclient.WithHTTPTimeout(10000 * time.Millisecond),
 	)
 	return client
 }

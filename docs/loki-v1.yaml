@@ -10,8 +10,6 @@ tags:
     description: event domain
   - name: order
     description: order domain
-  - name: payment
-    description: payment domain
 paths:
   /event:
     post:
@@ -24,8 +22,10 @@ paths:
             schema:
               $ref: '#/components/schemas/EventRequest'
       responses:
-        200:
+        201:
           $ref: "#/components/responses/EventSuccessResponse"
+        500:
+          $ref: "#/components/responses/ErrorDatabaseResponse"
       summary: create new event
   /event/{eventId}:
     get:
@@ -41,6 +41,8 @@ paths:
       responses:
         200:
           $ref: "#/components/responses/EventSuccessResponse"
+        500:
+          $ref: "#/components/responses/ErrorDatabaseResponse"
   /event/{eventId}/schedule:
     get:
       tags:
@@ -55,6 +57,8 @@ paths:
       responses:
         200:
           $ref: "#/components/responses/SchedulesSuccessResponse"
+        500:
+          $ref: "#/components/responses/ErrorDatabaseResponse"
     post:
       tags:
         - event
@@ -71,10 +75,77 @@ paths:
             schema:
               $ref: "#/components/schemas/ScheduleRequest"
       responses:
-        200:
+        201:
           $ref: "#/components/responses/SchedulesSuccessResponse"
+        500:
+          $ref: "#/components/responses/ErrorDatabaseResponse"
+  /order:
+    post:
+      tags:
+        - order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderRequest"
+      responses:
+        201:
+          $ref: "#/components/responses/OrderSuccessResponse"
+        500:
+          $ref: "#/components/responses/ErrorDatabaseResponse"
+  /order/{orderId}:
+    get:
+      tags:
+        - order
+      parameters:
+        - in: path
+          name: orderId
+          schema:
+            type: string
+          required: true
+          description: order id
+      responses:
+        201:
+          $ref: "#/components/responses/OrderSuccessResponse"
+        500:
+          $ref: "#/components/responses/ErrorDatabaseResponse"
+  /order/checkout:
+    post:
+      tags:
+        - order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutRequest"
+      responses:
+        201:
+          $ref: "#/components/responses/OrderSuccessResponse"
+        500:
+          $ref: "#/components/responses/ErrorDatabaseResponse"
 components:
   schemas:
+    CheckoutRequest:
+      type: object
+      properties:
+        orderId:
+          type: string
+          example: "64463df1-ebfd-4cce-b9d8-d67a0e21d8f6"
+    OrderRequest:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          example: "620000000001"
+        email:
+          type: string
+          example: "asd@asd.id"
+        scheduleId:
+          type: string
+          example: "363ff703-4b3b-4ec0-bd45-32e56df4e663"
+        qty:
+          type: number
+          example: 2
     ScheduleRequest:
       type: object
       properties:
@@ -162,10 +233,49 @@ components:
         booked:
           type: integer
           example: 0
-
+    OrderSchema:
+      type: object
+      properties:
+        orderId:
+          type: string
+          example: 6397e8f8-ca61-4617-8d18-8ee8c2d95cd4
+        phoneNumber:
+          type: string
+          example: "62000000001"
+        email:
+          type: string
+          example: asd@asd.id
+        status:
+          type: string
+          enum: [WAITING_FOR_PAYMENT, SUCCESS, TIMEOUT, CANCELED]
+          example: WAITING_FOR_PAYMENT
+        scheduleId:
+          type: string
+          example: "363ff703-4b3b-4ec0-bd45-32e56df4e663"
+        qty:
+          type: number
+          example: 2
+        createdAt:
+          type: string
+          example: "2022-05-24T19:58:54.849565+07:00"
+        updatedAt:
+          type: string
+          example: "2022-05-24T19:58:54.849565+07:00"
   responses:
-    EventSuccessResponse:
+    OrderSuccessResponse:
       description: success response for order creation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+                example: 201
+              data:
+                $ref: "#/components/schemas/OrderSchema"
+    EventSuccessResponse:
+      description: success response for event creation
       content:
         application/json:
           schema:
@@ -190,3 +300,16 @@ components:
                 type: array
                 items:
                   $ref: "#/components/schemas/ScheduleSchema"
+    ErrorDatabaseResponse:
+      description: error database response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: number
+                example: 500
+              message:
+                type: string
+                example: "database error"
